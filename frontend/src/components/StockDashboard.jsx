@@ -1,5 +1,57 @@
-import { Box, Grid, Text, VStack, HStack, Badge } from '@chakra-ui/react';
+import { Box, Grid, Text, VStack, HStack, Badge, Spinner } from '@chakra-ui/react';
 import ChatBox from './ChatBox';
+import { useEffect, useState } from 'react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
+
+const TWELVE_DATA_API_KEY = 'f465a20d33f748d6817d9b899d47edc1';
+
+function StockChart({ symbol }) {
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    if (!symbol) return;
+    setLoading(true);
+    setError(null);
+    setData(null);
+    fetch(`https://api.twelvedata.com/time_series?symbol=${symbol}&interval=1day&outputsize=60&apikey=${TWELVE_DATA_API_KEY}`)
+      .then(res => res.json())
+      .then(json => {
+        if (json.status === 'error' || !json.values) {
+          setError(json.message || 'No data');
+          setData(null);
+        } else {
+          // Reverse to chronological order
+          setData(json.values.reverse().map(d => ({
+            date: d.datetime,
+            close: parseFloat(d.close)
+          })));
+        }
+        setLoading(false);
+      })
+      .catch(e => {
+        setError('Failed to fetch data');
+        setLoading(false);
+      });
+  }, [symbol]);
+
+  if (loading) return <Box h="180px" display="flex" alignItems="center" justifyContent="center"><Spinner color="blue.400" /></Box>;
+  if (error) return <Box h="180px" display="flex" alignItems="center" justifyContent="center"><Text color="red.300">{error}</Text></Box>;
+  if (!data) return <Box h="180px" display="flex" alignItems="center" justifyContent="center"><Text color="#888">No data</Text></Box>;
+
+  return (
+    <ResponsiveContainer width="100%" height={180}>
+      <LineChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#333" />
+        <XAxis dataKey="date" tick={{ fill: '#aaa', fontSize: 12 }} hide={data.length > 20} />
+        <YAxis domain={['auto', 'auto']} tick={{ fill: '#aaa', fontSize: 12 }} width={60} />
+        <Tooltip contentStyle={{ background: '#23272a', border: 'none', color: '#fff' }} labelStyle={{ color: '#fff' }} />
+        <Line type="monotone" dataKey="close" stroke="#4fd1c5" strokeWidth={2} dot={false} />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}
 
 export default function StockDashboard({ selectedStock }) {
   if (!selectedStock) {
@@ -40,9 +92,7 @@ export default function StockDashboard({ selectedStock }) {
         justifyContent="center"
       >
         <Text fontWeight="bold" fontSize="lg" mb={2} color="#e0e0e0">{selectedStock.name}</Text>
-        <Box bg="#181a1b" borderRadius="md" h="180px" display="flex" alignItems="center" justifyContent="center">
-          <Text color="#888">[Chart Placeholder]</Text>
-        </Box>
+        <StockChart symbol={selectedStock.symbol} />
       </Box>
 
       {/* News/Highlights (bottom left) */}
