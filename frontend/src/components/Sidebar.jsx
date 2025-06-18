@@ -18,21 +18,14 @@ export default function Sidebar() {
       const res = await fetch(`https://finnhub.io/api/v1/search?q=${encodeURIComponent(search)}&token=${FINNHUB_API_KEY}`);
       const data = await res.json();
       const commonStock = data.result?.find((item) => item.type === 'Common Stock');
-      setSearchResults(commonStock ? [commonStock] : []);
+      if (commonStock && !cards.find((c) => c.symbol === commonStock.symbol)) {
+        setCards([...cards, { symbol: commonStock.symbol, name: commonStock.description || commonStock.symbol }]);
+      }
+      setSearch('');
     } catch (e) {
       setSearchResults([]);
     }
     setLoading(false);
-  };
-
-  // Add first 'Common Stock' card from search results
-  const addCommonStockCard = () => {
-    const common = searchResults[0];
-    if (common && !cards.find((c) => c.symbol === common.symbol)) {
-      setCards([...cards, { symbol: common.symbol, name: common.description || common.symbol }]);
-    }
-    setSearch('');
-    setSearchResults([]);
   };
 
   return (
@@ -61,7 +54,7 @@ export default function Sidebar() {
             _hover={{ bg: '#333', cursor: 'pointer' }}
             p={2}
             borderRadius="md"
-            onClick={addCommonStockCard}
+            onClick={handleSearch}
           >
             <Text color="#e0e0e0" fontWeight="bold">
               {searchResults[0]?.symbol || 'No Common Stock found'}
