@@ -1,7 +1,21 @@
 import { useState } from 'react';
 import { Box, VStack, Input, Button, Text, HStack, Flex, List, ListItem, Spinner } from '@chakra-ui/react';
+import { useEffect } from 'react';
 
 const FINNHUB_API_KEY = 'd19a5c9r01qkcat71150d19a5c9r01qkcat7115g';
+
+function LiveClock() {
+  const [time, setTime] = useState(new Date());
+  useEffect(() => {
+    const interval = setInterval(() => setTime(new Date()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+  return (
+    <Text fontSize="lg" color="#aaa" ml={2} fontFamily="monospace">
+      {time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+    </Text>
+  );
+}
 
 export default function Sidebar({ onSelectStock }) {
   const [search, setSearch] = useState('');
@@ -39,9 +53,12 @@ export default function Sidebar({ onSelectStock }) {
 
   return (
     <Box w="320px" bg="#222426" p={6} minH="100vh">
-      <Text fontSize="3xl" fontWeight="bold" color="#e0e0e0" mb={4}>
-        NewsScope
-      </Text>
+      <HStack mb={4} align="center">
+        <Text fontSize="3xl" fontWeight="bold" color="#e0e0e0">
+          NewsScope
+        </Text>
+        <LiveClock />
+      </HStack>
       <HStack mb={6}>
         <Input
           placeholder="search stocks"
