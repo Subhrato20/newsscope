@@ -3,6 +3,7 @@ import os
 import json
 from dotenv import load_dotenv
 from tools import deep_market_research, summarize_user_portfolio
+from rag_retriever import get_relevant_articles
 
 load_dotenv()
 
@@ -49,10 +50,23 @@ class LLM:
 
     def get_chat_response(self, messages, temperature=0.7, max_tokens=800):
         try:
-            # First LLM call (with tool suggestions enabled)
+            # 1. Get the latest user message
+            user_message = messages[-1]["content"]
+
+            # 2. Retrieve relevant articles as context
+            context_articles = get_relevant_articles(user_message, top_k=3)
+            context_text = "\n\n".join([a["markdown"] for a in context_articles])
+
+            # 3. Prepend the context to the user message
+            context_prompt = f"Context:\n{context_text}\n\nQuestion: {user_message}\nAnswer:"
+
+            # 4. Replace the last user message with the context-augmented one
+            new_messages = messages[:-1] + [{"role": "user", "content": context_prompt}]
+
+            # 5. Proceed as before (function-calling logic unchanged)
             response = self.client.chat.completions.create(
                 model=self.model,
-                messages=messages,
+                messages=new_messages,
                 temperature=temperature,
                 max_tokens=max_tokens,
                 tools=self.tools,
@@ -61,19 +75,16 @@ class LLM:
 
             choice = response.choices[0]
 
-            # Check if LLM is invoking a tool
             if choice.finish_reason == "tool_calls":
                 tool_call = choice.message.tool_calls[0]
                 tool_name = tool_call.function.name
                 arguments = json.loads(tool_call.function.arguments)
 
-                # Run the actual tool function
                 tool_result = self.tool_functions[tool_name](**arguments)
 
-                # Add tool result to messages and re-query LLM for final answer
                 followup_response = self.client.chat.completions.create(
                     model=self.model,
-                    messages=messages + [
+                    messages=new_messages + [
                         {"role": "assistant", "tool_calls": [tool_call]},
                         {"role": "tool", "tool_call_id": tool_call.id, "content": tool_result}
                     ],
@@ -83,7 +94,6 @@ class LLM:
 
                 return followup_response.choices[0].message.content
 
-            # If no tool used, return the first reply directly
             return choice.message.content
 
         except Exception as e:
