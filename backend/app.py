@@ -4,7 +4,6 @@ from dotenv import load_dotenv
 import os
 from llm import LLM
 
-# Load environment variables
 load_dotenv()
 
 app = Flask(__name__)
@@ -27,7 +26,7 @@ def chat():
         
         if not messages:
             return jsonify({"error": "No messages provided"}), 400
-            
+
         response = llm.get_chat_response(messages)
         return jsonify({"response": response})
         
@@ -36,4 +35,4 @@ def chat():
 
 if __name__ == '__main__':
     port = int(os.getenv('PORT', 8080))
-    app.run(host='0.0.0.0', port=port, debug=True) 
+    app.run(host='0.0.0.0', port=port, debug=True)
