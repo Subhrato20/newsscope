@@ -1,8 +1,24 @@
-import { useState } from 'react';
-import { Box, VStack, Input, Button, Text, HStack, Flex, List, ListItem, Spinner } from '@chakra-ui/react';
-import { useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { Box, VStack, Text, HStack, Flex, Image, Spinner } from '@chakra-ui/react';
 
 const FINNHUB_API_KEY = 'd19a5c9r01qkcat71150d19a5c9r01qkcat7115g';
+
+// Company names mapping
+const COMPANY_NAMES = {
+  'AAPL': 'Apple Inc.',
+  'GOOGL': 'Alphabet Inc.',
+  'TSLA': 'Tesla Inc.',
+  'NVDA': 'NVIDIA Corporation',
+  'AMZN': 'Amazon.com Inc.',
+  'MSFT': 'Microsoft Corporation',
+  'META': 'Meta Platforms Inc.',
+  'NFLX': 'Netflix Inc.',
+  'CRM': 'Salesforce Inc.',
+  'ADBE': 'Adobe Inc.',
+  'DIS': 'The Walt Disney Company',
+  'INTC': 'Intel Corporation',
+  'CSCO': 'Cisco Systems Inc.'
+};
 
 function LiveClock() {
   const [time, setTime] = useState(new Date());
@@ -17,34 +33,101 @@ function LiveClock() {
   );
 }
 
+function StockLogo({ symbol }) {
+  const [logoUrl, setLogoUrl] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    const fetchLogo = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`https://finnhub.io/api/v1/stock/profile2?symbol=${symbol}&token=${FINNHUB_API_KEY}`);
+        const data = await response.json();
+        
+        if (data.logo) {
+          setLogoUrl(data.logo);
+        } else {
+          setError(true);
+        }
+      } catch {
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchLogo();
+  }, [symbol]);
+
+  if (loading) {
+    return (
+      <Box w="32px" h="32px" bg="#444" borderRadius="full" mr={4} display="flex" alignItems="center" justifyContent="center">
+        <Spinner size="sm" color="blue.400" />
+      </Box>
+    );
+  }
+
+  if (error || !logoUrl) {
+    return (
+      <Box w="32px" h="32px" bg="#444" borderRadius="full" mr={4} display="flex" alignItems="center" justifyContent="center">
+        <Text fontSize="xs" color="#aaa" fontWeight="bold">{symbol.charAt(0)}</Text>
+      </Box>
+    );
+  }
+
+  return (
+    <Image
+      src={logoUrl}
+      alt={`${symbol} logo`}
+      w="32px"
+      h="32px"
+      borderRadius="full"
+      mr={4}
+      objectFit="cover"
+      fallback={
+        <Box w="32px" h="32px" bg="#444" borderRadius="full" mr={4} display="flex" alignItems="center" justifyContent="center">
+          <Text fontSize="xs" color="#aaa" fontWeight="bold">{symbol.charAt(0)}</Text>
+        </Box>
+      }
+    />
+  );
+}
+
 export default function Sidebar({ onSelectStock }) {
-  const [search, setSearch] = useState('');
-  const [searchResults, setSearchResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [cards, setCards] = useState([]);
+  const [portfolio, setPortfolio] = useState({});
+  const [userName, setUserName] = useState('');
   const [selectedStock, setSelectedStock] = useState(null);
 
-  // Search stocks using Finnhub API
-  const handleSearch = async () => {
-    if (!search) return;
-    setLoading(true);
-    setSearchResults([]);
-    try {
-      const res = await fetch(`https://finnhub.io/api/v1/search?q=${encodeURIComponent(search)}&token=${FINNHUB_API_KEY}`);
-      const data = await res.json();
-      const commonStock = data.result?.find((item) => item.type === 'Common Stock');
-      if (commonStock && !cards.find((c) => c.symbol === commonStock.symbol)) {
-        const newCard = { symbol: commonStock.symbol, name: commonStock.description || commonStock.symbol };
-        setCards([...cards, newCard]);
-        // Automatically select the newly added stock
-        handleStockSelect(newCard);
+  // Load user portfolio data
+  useEffect(() => {
+    const loadUserData = async () => {
+      try {
+        const response = await fetch('/data/user_data.json');
+        const userData = await response.json();
+        if (userData.length > 0) {
+          const user = userData[0]; // Get the first user
+          setUserName(user.user_name);
+          setPortfolio(user.portfolio);
+          
+          // Auto-select the first stock in the portfolio
+          const firstStock = Object.keys(user.portfolio)[0];
+          if (firstStock) {
+            const stockData = { 
+              symbol: firstStock, 
+              name: COMPANY_NAMES[firstStock] || firstStock 
+            };
+            setSelectedStock(stockData);
+            onSelectStock?.(stockData);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load user data:', error);
       }
-      setSearch('');
-    } catch (e) {
-      setSearchResults([]);
-    }
-    setLoading(false);
-  };
+    };
+    
+    loadUserData();
+  }, [onSelectStock]);
 
   const handleStockSelect = (stock) => {
     setSelectedStock(stock);
@@ -52,69 +135,72 @@ export default function Sidebar({ onSelectStock }) {
   };
 
   return (
-    <Box w="320px" bg="#222426" p={6} minH="100vh">
+    <Box w="320px" bg="#222426" p={6} minH="100vh" display="flex" flexDirection="column">
       <HStack mb={4} align="center">
         <Text fontSize="3xl" fontWeight="bold" color="#e0e0e0">
           NewsScope
         </Text>
         <LiveClock />
       </HStack>
-      <HStack mb={6}>
-        <Input
-          placeholder="search stocks"
-          bg="#333"
-          color="#e0e0e0"
-          fontWeight="bold"
-          _placeholder={{ color: '#aaa' }}
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') handleSearch(); }}
-        />
-        <Button bg="#444" color="#e0e0e0" fontWeight="bold" onClick={handleSearch} isLoading={loading}>Search</Button>
-      </HStack>
-      {/* Search Results */}
-      {loading && <Spinner color="#e0e0e0" mb={2} />}
-      {searchResults.length > 0 && (
-        <List spacing={1} mb={4} bg="#23272a" borderRadius="md" p={2} maxH="180px" overflowY="auto">
-          <ListItem
-            _hover={{ bg: '#333', cursor: 'pointer' }}
-            p={2}
-            borderRadius="md"
-            onClick={handleSearch}
-          >
-            <Text color="#e0e0e0" fontWeight="bold">
-              {searchResults[0]?.symbol || 'No Common Stock found'}
-            </Text>
-            <Text color="#aaa" fontSize="sm">
-              {searchResults[0]?.description || ''}
-            </Text>
-            <Text color="#888" fontSize="xs">
-              Click to add Common Stock
-            </Text>
-          </ListItem>
-        </List>
-      )}
-      <VStack spacing={4} align="stretch">
-        {cards.map((card) => (
+      
+      <Box mb={6}>
+        <Text fontSize="lg" color="#e0e0e0" fontWeight="bold" mb={2}>
+          Welcome, {userName}
+        </Text>
+        <Text fontSize="md" color="#aaa" mb={4}>
+          Your Portfolio
+        </Text>
+      </Box>
+
+      <VStack 
+        spacing={4} 
+        align="stretch" 
+        flex={1}
+        overflowY="auto"
+        css={{
+          '&::-webkit-scrollbar': {
+            width: '6px',
+          },
+          '&::-webkit-scrollbar-track': {
+            background: '#1a1d1e',
+          },
+          '&::-webkit-scrollbar-thumb': {
+            background: '#444',
+            borderRadius: '3px',
+          },
+          '&::-webkit-scrollbar-thumb:hover': {
+            background: '#555',
+          },
+        }}
+        pr={2}
+      >
+        {Object.entries(portfolio).map(([symbol, shares]) => (
           <Flex
-            key={card.symbol}
-            bg={selectedStock?.symbol === card.symbol ? "#2c3136" : "#23272a"}
+            key={symbol}
+            bg={selectedStock?.symbol === symbol ? "#2c3136" : "#23272a"}
             borderRadius="md"
-            p={6}
+            p={4}
             align="center"
-            justify="flex-start"
+            minH="80px"
             cursor="pointer"
-            onClick={() => handleStockSelect(card)}
+            onClick={() => handleStockSelect({ 
+              symbol, 
+              name: COMPANY_NAMES[symbol] || symbol 
+            })}
             _hover={{ bg: "#2c3136" }}
             transition="background-color 0.2s"
+            mb={1}
           >
-            <Box w="32px" h="32px" bg="#444" borderRadius="full" mr={4} />
-            <Box>
-              <Text fontWeight="bold" fontSize="2xl" color="#e0e0e0">
-                {card.symbol}
+            <StockLogo symbol={symbol} />
+            <Box ml={2} flex="1 1 0" minW={0} display="flex" flexDirection="column" justifyContent="center">
+              <Text fontWeight="bold" fontSize="xl" color="#e0e0e0" lineHeight={1}>
+                {symbol}
               </Text>
-              <Text color="#aaa" fontSize="lg">
-                {card.name}
+              <Text color="#aaa" fontSize="sm" mb={0.5} isTruncated maxW="170px">
+                {COMPANY_NAMES[symbol] || symbol}
+              </Text>
+              <Text color="#888" fontSize="sm" fontWeight="medium" mt={1} noOfLines={1}>
+                {shares} shares
               </Text>
             </Box>
           </Flex>
