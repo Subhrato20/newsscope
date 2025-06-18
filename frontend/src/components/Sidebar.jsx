@@ -17,7 +17,8 @@ export default function Sidebar() {
     try {
       const res = await fetch(`https://finnhub.io/api/v1/search?q=${encodeURIComponent(search)}&token=${FINNHUB_API_KEY}`);
       const data = await res.json();
-      setSearchResults(data.result || []);
+      const commonStock = data.result?.find((item) => item.type === 'Common Stock');
+      setSearchResults(commonStock ? [commonStock] : []);
     } catch (e) {
       setSearchResults([]);
     }
@@ -26,7 +27,7 @@ export default function Sidebar() {
 
   // Add first 'Common Stock' card from search results
   const addCommonStockCard = () => {
-    const common = searchResults.find((item) => item.type === 'Common Stock');
+    const common = searchResults[0];
     if (common && !cards.find((c) => c.symbol === common.symbol)) {
       setCards([...cards, { symbol: common.symbol, name: common.description || common.symbol }]);
     }
@@ -63,10 +64,10 @@ export default function Sidebar() {
             onClick={addCommonStockCard}
           >
             <Text color="#e0e0e0" fontWeight="bold">
-              {searchResults.find((item) => item.type === 'Common Stock')?.symbol || 'No Common Stock found'}
+              {searchResults[0]?.symbol || 'No Common Stock found'}
             </Text>
             <Text color="#aaa" fontSize="sm">
-              {searchResults.find((item) => item.type === 'Common Stock')?.description || ''}
+              {searchResults[0]?.description || ''}
             </Text>
             <Text color="#888" fontSize="xs">
               Click to add Common Stock
