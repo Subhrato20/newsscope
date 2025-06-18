@@ -36,6 +36,7 @@ This project was developed for the **HackwithNewYork** hackathon.
     - `firecrawl-py`: For searching and scraping news articles from the web.
     - `Flask-CORS`: To handle cross-origin requests from the frontend.
     - `python-dotenv`: To manage environment variables.
+    - `pathway`: RAG pipeline and management
 
 ### Frontend
 
