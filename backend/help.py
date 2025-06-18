@@ -15,7 +15,7 @@ def parse_sentiment_score(summary_text):
         if match:
             return float(match.group(1))
         else:
-            return None
+            return 0
     except Exception as e:
         print(f"Error parsing sentiment score: {e}")
-        return None
+        return 0

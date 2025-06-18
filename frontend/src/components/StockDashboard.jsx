@@ -1,5 +1,6 @@
 import { Box, Grid, Text, VStack, HStack, Badge, Spinner, Button, ButtonGroup } from '@chakra-ui/react';
 import ChatBox from './ChatBox';
+import NewsHighlights from './NewsHighlights';
 import { useEffect, useState, useMemo, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts';
 
@@ -148,44 +149,7 @@ export default function StockDashboard({ selectedStock }) {
       </Box>
 
       {/* News/Highlights (bottom left) */}
-      <Box
-        gridColumn="1"
-        gridRow="2"
-        bg="#23272a"
-        borderRadius="md"
-        p={6}
-        minH="220px"
-        position="relative"
-        display="flex"
-        flexDirection="column"
-        justifyContent="flex-start"
-      >
-        <HStack justify="flex-start" align="center" mb={4}>
-          <Text fontWeight="bold" fontSize="2xl" color="#e0e0e0">NEWS/HIGHLIGHTS</Text>
-          <Badge
-            bg="#888"
-            color="#e0e0e0"
-            fontWeight="bold"
-            fontSize="lg"
-            borderRadius="md"
-            px={4}
-            py={1}
-            ml={2}
-            position="absolute"
-            top={6}
-            right={6}
-          >
-            +30
-          </Badge>
-        </HStack>
-        <VStack align="flex-start" spacing={2} fontSize="xl">
-          <Text>9:00am blah blah +30</Text>
-          <Text>9:20am blah blah -300</Text>
-          <Text>9:30am blah blah +30</Text>
-          <Text>10:00am blah blah +50</Text>
-          <Text>11:00am blah blah -30</Text>
-        </VStack>
-      </Box>
+      <NewsHighlights selectedStock={selectedStock} />
 
       {/* Chatbox (right column, spans both rows) */}
       <Box

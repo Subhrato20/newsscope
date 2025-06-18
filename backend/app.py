@@ -52,6 +52,8 @@ def chat():
 @app.route('/api/news', methods=['POST'])
 def news():
     try:
+        print("News API called: " + str(request.json))
+
         data = request.json
         stock_name = data.get('stock_name', '')
         
@@ -86,7 +88,7 @@ def news():
 
         # Calculate average sentiment score
         valid_scores = [score for score in sentiment_scores if score is not None]
-        total_sentiment = sum(valid_scores)
+        total_sentiment = sum(valid_scores) / len(valid_scores) if valid_scores else 0
 
         return jsonify({
             "stock_name": stock_name,
