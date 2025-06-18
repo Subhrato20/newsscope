@@ -24,14 +24,12 @@ def chat():
     try:
         data = request.json
         messages = data.get('messages', [])
-        use_web_search = data.get('use_web_search', False)
-        tool_choice = data.get('tool_choice', None)
         
         if not messages:
             return jsonify({"error": "No messages provided"}), 400
             
-        response = llm.get_chat_response(messages, use_web_search, tool_choice)
-        return jsonify(response)
+        response = llm.get_chat_response(messages)
+        return jsonify({"response": response})
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
