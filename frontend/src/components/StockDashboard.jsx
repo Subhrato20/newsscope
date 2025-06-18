@@ -1,4 +1,5 @@
 import { Box, Grid, Text, VStack, HStack, Badge } from '@chakra-ui/react';
+import ChatBox from './ChatBox';
 
 export default function StockDashboard({ selectedStock }) {
   if (!selectedStock) {
@@ -97,12 +98,7 @@ export default function StockDashboard({ selectedStock }) {
         alignItems="center"
         justifyContent="flex-end"
       >
-        <Box w="100%" h="100%" display="flex" flexDirection="column" alignItems="center" justifyContent="center">
-          <Text fontWeight="bold" fontSize="xl" mb={2} color="#e0e0e0">ChatGPT</Text>
-          <Box bg="#181a1b" borderRadius="md" w="95%" h="90%" minH="180px" display="flex" alignItems="center" justifyContent="center">
-            <Text color="#e0e0e0">[AI Agent Placeholder]</Text>
-          </Box>
-        </Box>
+        <ChatBox />
       </Box>
     </Grid>
   );
