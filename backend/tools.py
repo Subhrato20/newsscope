@@ -1,7 +1,7 @@
 import json
 
 def get_user_portfolio():
-    path = "/Users/subhratosom/NYC/newsscope/data/user_data.json"
+    path = "/Users/davidlai/Desktop/newsscope/frontend/public/data/user_data.json"
     try:
         with open(path, "r") as f:
             data = json.load(f)
