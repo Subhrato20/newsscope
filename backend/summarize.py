@@ -8,7 +8,7 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 client = OpenAI(api_key=OPENAI_API_KEY)
 
-def load_articles(file_path="input_articles.json"):
+def load_articles(file_path="articles.json"):
     try:
         with open(file_path, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -37,6 +37,7 @@ def summarize_article(article):
             "content": (
                 "You are a financial news summarizer. Given one article, return a 1–2 sentence summary capturing the key financial development. "
                 "Keep it concise and in a neutral tone. Focus on company names, deals, stock movements, or product updates."
+                "Give a numerical sentiment score reflecting the likely impact on the stock price, from -100 to 100, -100 being bad and 100 being good."
             )
         },
         {
@@ -58,7 +59,7 @@ def summarize_article(article):
 
 if __name__ == "__main__":
     print("📥 Loading input data...")
-    articles = load_articles("input_articles.json")
+    articles = load_articles("articles.json")
 
     print(f"🧾 Found {len(articles)} articles.\n")
 

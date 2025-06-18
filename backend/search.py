@@ -12,6 +12,39 @@ class Article(pw.Schema):
     metadata: dict
     links: list[str]
 
+async def news_api_call(stock_name, limit=5):
+    try:
+        app = AsyncFirecrawlApp(api_key='fc-0d3f25709bd14df9924bad5a307be023')
+        query = f"Most recent news about {stock_name} stock"
+        
+        response = await app.search(
+            query=query,
+            limit=limit,
+            scrape_options=ScrapeOptions(formats=['markdown', 'links'])
+        )
+        
+        return response
+        
+    except Exception as e:
+        print(f"Error searching for news about {stock_name}: {str(e)}")
+        return []
+
+async def response_to_articles(response):
+    articles = []
+    if response and "data" in response:
+        for record in response["data"]:
+            article = {
+                "title": record.get("title", ""),
+                "description": record.get("description", ""),
+                "url": record.get("url", ""),
+                "markdown": record.get("markdown", ""),
+                "metadata": record.get("metadata", {}),
+                "links": record.get("links", [])
+            }
+            articles.append(article)
+    
+    return articles
+
 async def main():
     app = AsyncFirecrawlApp(api_key='fc-0d3f25709bd14df9924bad5a307be023')
     response = await app.search(
@@ -34,4 +67,5 @@ async def main():
     pw.debug.compute_and_print_update_stream(articles)
     pw.run()
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
