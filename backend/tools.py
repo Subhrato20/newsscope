@@ -9,7 +9,7 @@ load_dotenv()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 def get_user_portfolio() -> Tuple[str, Dict[str, int]]:
-    path = "/Users/subhratosom/NYC/newsscope/data/user_data.json"
+    path = "/Users/rolandyang/Documents/GitHub/newsscope/frontend/public/data/user_data.json"
     try:
         with open(path, "r") as f:
             data = json.load(f)
