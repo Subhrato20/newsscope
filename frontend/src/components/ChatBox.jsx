@@ -15,15 +15,40 @@ export default function ChatBox() {
     setMessages((msgs) => [...msgs, userMsg]);
     setInput('');
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      const response = await fetch('http://localhost:8080/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          messages: [...messages, userMsg].map(m => ({
+            role: m.sender === 'ai' ? 'assistant' : m.sender,
+            content: m.text
+          }))
+        }),
+      });
+      const data = await response.json();
+      if (data.response) {
+        setMessages((msgs) => [
+          ...msgs,
+          { sender: 'ai', text: data.response }
+        ]);
+      } else {
+        setMessages((msgs) => [
+          ...msgs,
+          { sender: 'ai', text: data.error || 'Sorry, something went wrong.' }
+        ]);
+      }
+    } catch (error) {
       setMessages((msgs) => [
         ...msgs,
-        { sender: 'ai', text: 'This is a placeholder response from the AI.' }
+        { sender: 'ai', text: 'Error connecting to backend.' }
       ]);
+    } finally {
       setLoading(false);
       messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 900);
+    }
   };
 
   const handleKeyDown = (e) => {
