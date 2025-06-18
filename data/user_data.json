@@ -1,0 +1,13 @@
+[
+    {
+      "userid": "FYJ57",
+      "user_name": "Alice Johnson",
+      "portfolio": {
+        "AAPL": 18,
+        "GOOGL": 10,
+        "TSLA": 6,
+        "NVDA": 8,
+        "AMZN": 5
+      }
+    }
+  ]
