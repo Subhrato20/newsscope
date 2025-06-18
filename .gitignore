@@ -1,1 +1,4 @@
-.env
+echo ".env" >> .gitignore
+echo "__pycache__/" >> .gitignore
+venv
+frontend/node_modules/
