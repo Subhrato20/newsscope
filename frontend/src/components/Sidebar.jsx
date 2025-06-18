@@ -3,11 +3,12 @@ import { Box, VStack, Input, Button, Text, HStack, Flex, List, ListItem, Spinner
 
 const FINNHUB_API_KEY = 'd19a5c9r01qkcat71150d19a5c9r01qkcat7115g';
 
-export default function Sidebar() {
+export default function Sidebar({ onSelectStock }) {
   const [search, setSearch] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [cards, setCards] = useState([]);
+  const [selectedStock, setSelectedStock] = useState(null);
 
   // Search stocks using Finnhub API
   const handleSearch = async () => {
@@ -19,13 +20,21 @@ export default function Sidebar() {
       const data = await res.json();
       const commonStock = data.result?.find((item) => item.type === 'Common Stock');
       if (commonStock && !cards.find((c) => c.symbol === commonStock.symbol)) {
-        setCards([...cards, { symbol: commonStock.symbol, name: commonStock.description || commonStock.symbol }]);
+        const newCard = { symbol: commonStock.symbol, name: commonStock.description || commonStock.symbol };
+        setCards([...cards, newCard]);
+        // Automatically select the newly added stock
+        handleStockSelect(newCard);
       }
       setSearch('');
     } catch (e) {
       setSearchResults([]);
     }
     setLoading(false);
+  };
+
+  const handleStockSelect = (stock) => {
+    setSelectedStock(stock);
+    onSelectStock?.(stock);
   };
 
   return (
@@ -69,8 +78,19 @@ export default function Sidebar() {
         </List>
       )}
       <VStack spacing={4} align="stretch">
-        {cards.map((card, idx) => (
-          <Flex key={card.symbol} bg="#23272a" borderRadius="md" p={6} align="center" justify="flex-start">
+        {cards.map((card) => (
+          <Flex
+            key={card.symbol}
+            bg={selectedStock?.symbol === card.symbol ? "#2c3136" : "#23272a"}
+            borderRadius="md"
+            p={6}
+            align="center"
+            justify="flex-start"
+            cursor="pointer"
+            onClick={() => handleStockSelect(card)}
+            _hover={{ bg: "#2c3136" }}
+            transition="background-color 0.2s"
+          >
             <Box w="32px" h="32px" bg="#444" borderRadius="full" mr={4} />
             <Box>
               <Text fontWeight="bold" fontSize="2xl" color="#e0e0e0">

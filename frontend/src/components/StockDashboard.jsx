@@ -1,6 +1,21 @@
 import { Box, Grid, Text, VStack, HStack, Badge } from '@chakra-ui/react';
 
-export default function StockDashboard() {
+export default function StockDashboard({ selectedStock }) {
+  if (!selectedStock) {
+    return (
+      <Box 
+        flex={1} 
+        minH="100vh" 
+        bg="#181a1b" 
+        display="flex" 
+        alignItems="center" 
+        justifyContent="center"
+      >
+        <Text color="#888" fontSize="xl">Select a stock to view its dashboard</Text>
+      </Box>
+    );
+  }
+
   return (
     <Grid
       templateColumns={{ base: '1fr', md: '1fr 1fr' }}
@@ -13,7 +28,7 @@ export default function StockDashboard() {
     >
       {/* Chart */}
       <Box bg="#23272a" borderRadius="md" p={6} minH="300px">
-        <Text fontWeight="bold" fontSize="lg" mb={2} color="#e0e0e0">Amazon</Text>
+        <Text fontWeight="bold" fontSize="lg" mb={2} color="#e0e0e0">{selectedStock.name}</Text>
         <Box bg="#181a1b" borderRadius="md" h="220px" display="flex" alignItems="center" justifyContent="center">
           <Text color="#888">[Chart Placeholder]</Text>
         </Box>
