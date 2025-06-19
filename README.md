@@ -25,7 +25,7 @@ This project was developed for the **HackwithNewYork** hackathon.
         - `summarize_user_portfolio`: Analyze and report on your mock portfolio holdings.
         - `deep_market_research`: Conduct a web search on a stock and provide a "Buy," "Hold," or "Sell" recommendation.
 
-![Our Demo](https://drive.google.com/file/d/15-Xc4_8BrDdE8ZMfLcNbJgOLJ4akPosg/view?usp=drive_link)
+[Our Demo](https://drive.google.com/file/d/15-Xc4_8BrDdE8ZMfLcNbJgOLJ4akPosg/view?usp=drive_link)
 
 ## 🛠️ Tech Stack
 
