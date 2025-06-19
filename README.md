@@ -20,10 +20,12 @@ This project was developed for the **HackwithNewYork** hackathon.
     - Calculates and displays an average sentiment score to quickly gauge market mood.
 - **RAG-Powered Chatbot**:
     - Engage in a conversation with an AI assistant (powered by GPT-4o).
-    - The chatbot uses Retrieval-Augmented Generation (RAG) to answer questions using context from the latest fetched news articles and market data.
+    - The chatbot uses Retrieval-Augmented Generation (RAG) to answer questions using context from the latest fetched news articles, market data, and your current portfolio status.
     - **Function Calling**: The AI can execute tools to:
         - `summarize_user_portfolio`: Analyze and report on your mock portfolio holdings.
         - `deep_market_research`: Conduct a web search on a stock and provide a "Buy," "Hold," or "Sell" recommendation.
+
+![Our Demo](https://drive.google.com/file/d/15-Xc4_8BrDdE8ZMfLcNbJgOLJ4akPosg/view?usp=drive_link)
 
 ## 🛠️ Tech Stack
 
