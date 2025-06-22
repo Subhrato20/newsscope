@@ -2,6 +2,8 @@
 
 # 📈 NewsScope
 
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Subhrato20/newsscope)
+
 **NewsScope** is an AI-powered financial research dashboard that provides real-time news analysis, sentiment scoring, and a conversational AI assistant to help you make smarter investment decisions.
 
 This project was developed for the **HackwithNewYork** hackathon.
